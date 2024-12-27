@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+    go_runtime:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile.go
+        command: tail -f /dev/null
+        volumes:
+            - ./going:/workspace:cached
+            - /var/run/docker.sock:/var/run/docker.sock
+        working_dir: /workspace
+        privileged: true
+
+    rust_website:
+        build:
+            context: .
+            dockerfile: docker/Dockerfile.rust
+
+        volumes:
+            - ./rusting:/workspace:cached
+
+        command: tail -f /dev/null
+        network_mode: "host"
+        working_dir: /workspace
+
+    database:
+        image: postgres:16.2
+        environment:
+            POSTGRES_USER: "postgres"
+            POSTGRES_PASSWORD: "postgres"
+            POSTGRES_DB: "rust_website"
+        ports:
+            - "5532:5432"
+        volumes:
+            - ./docker/database/init.sql:/docker-entrypoint-initdb.d/init.sql

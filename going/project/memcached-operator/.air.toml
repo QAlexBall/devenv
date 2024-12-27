@@ -1,0 +1,7 @@
+[build]
+cmd = "go build -o ./tmp/main ./cmd/main.go"
+bin = "./tmp/main"
+delay = 1000 # in milliseconds
+
+[log]
+level = "info"
