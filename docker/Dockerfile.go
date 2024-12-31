@@ -28,6 +28,8 @@ RUN curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubec
     mv kubectl /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl
 
+RUN curl -sSfL https://goblin.run/github.com/cosmtrek/air | sh
+
 # Set up workspace
 WORKDIR /workspace
 ENV KUBECONFIG=/workspace/.kube/config

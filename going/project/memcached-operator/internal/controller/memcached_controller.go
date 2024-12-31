@@ -23,6 +23,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -91,7 +92,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// Let's just set the status as Unknown when no status is available
-	if memcached.Status.Conditions == nil || len(memcached.Status.Conditions) == 0 {
+	if len(memcached.Status.Conditions) == 0 {
 		meta.SetStatusCondition(&memcached.Status.Conditions, metav1.Condition{
 			Type:    typeAvailableMemcached,
 			Status:  metav1.ConditionUnknown,
@@ -116,7 +117,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	// Check if the deployment already exists, if not create a new one
 	found := &appsv1.Deployment{}
-	fmt.Println("found: ", found)
+	fmt.Println("@119 ===> found: ", found.ObjectMeta.Name)
 	err = r.Get(ctx, types.NamespacedName{Name: memcached.Name, Namespace: memcached.Namespace}, found)
 	if err != nil && apierrors.IsNotFound(err) {
 		// Define a new deployment
@@ -159,6 +160,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// Let's return the error for the reconciliation be re-trigged again
 		return ctrl.Result{}, err
 	}
+	fmt.Println("@162 ===> found: ", found.ObjectMeta.Name)
 
 	// The CRD API defines that the Memcached type have a MemcachedSpec.Size field
 	// to set the quantity of Deployment instances to the desired state on the cluster.
@@ -203,15 +205,18 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// The following implementation will update the status
-	meta.SetStatusCondition(&memcached.Status.Conditions, metav1.Condition{Type: typeAvailableMemcached,
-		Status: metav1.ConditionTrue, Reason: "Reconciling",
-		Message: fmt.Sprintf("Deployment for custom resource (%s) with %d replicas created successfully", memcached.Name, size)})
+	meta.SetStatusCondition(&memcached.Status.Conditions, metav1.Condition{
+		Type:    typeAvailableMemcached,
+		Status:  metav1.ConditionTrue,
+		Reason:  "Reconciling",
+		Message: fmt.Sprintf("Deployment for custom resource (%s) with %d replicas created successfully", memcached.Name, size),
+	})
 
 	if err := r.Status().Update(ctx, memcached); err != nil {
 		log.Error(err, "Failed to update Memcached status")
 		return ctrl.Result{}, err
 	}
-
+	fmt.Printf("@225 ===> memcached: \n%s\n%s\n", memcached.Name, prettyPrint(memcached.Status.Conditions))
 	return ctrl.Result{}, nil
 }
 
