@@ -1,0 +1,3 @@
+[submodule "going/project/kubebuilder_cronjob"]
+	path = going/project/kubebuilder_cronjob
+	url = https://github.com/QAlexBall/kubebuilder_cronjob.git
