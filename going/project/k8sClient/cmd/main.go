@@ -1,6 +1,7 @@
 package main
 
 import (
+	"k8sClient/pkg/namespaces"
 	"k8sClient/pkg/pods"
 
 	"github.com/spf13/cobra"
@@ -15,6 +16,7 @@ func main() {
 		},
 	}
 
+	rootCmd.AddCommand(namespaces.NamespaceCmd)
 	rootCmd.AddCommand(pods.PodCmd)
 	rootCmd.Execute()
 }
